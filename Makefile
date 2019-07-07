@@ -4,9 +4,12 @@ clean:
 	rm .coverage
 
 setup:
-	pip install -r requirements.txt
+	pip install -e .
 	pip install -r requirements_test.txt
 	tox -r
+
+run:
+	python paa191t2/main.py
 
 tests:
 	tox
