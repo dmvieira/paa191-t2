@@ -8,6 +8,6 @@
 # Best known solution is x_i1 = x_i2 = ... = x_ik = 1 and 0 otherwise
 # Lines 3 to m+1: id coeff card i_1 ... i_card
 # id: number of the term (id=1,...,m)
-# coeff: coefficient 
+# coeff: coefficient
 # card: number of variables in the product
 # i_1 ... i_card: list of variables in the product

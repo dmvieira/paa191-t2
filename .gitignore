@@ -105,4 +105,9 @@ venv.bak/
 
 # cover
 cover
+
+#code
 .vscode
+
+#images
+*.png
