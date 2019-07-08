@@ -10,4 +10,4 @@ graph.remove_edges_from(graph.selfloop_edges())
 
 execution_graph, selected_nodes, bound = binary_bb(list(range(1, problem_set.n + 1)), graph, problem_set.weights)
 
-print(selected_nodes, bound)
+print([execution_graph.node[node]["name"] for node in selected_nodes], bound)
