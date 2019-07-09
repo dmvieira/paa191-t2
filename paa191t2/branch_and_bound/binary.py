@@ -3,91 +3,69 @@ import math
 import networkx as nx
 
 
-def partition_bb(graph: nx.DiGraph, node, parent_node):
+def partition_bb(to_fix, partition):
     """Particiona por 0 e 1 e retorna grafo com todos os nós
     com valores para zero e um (seguindo ou não o ramo da árvore)
     """
-    node_name_true = uuid.uuid4()
-    node_name_false = uuid.uuid4()
-    graph.add_node(node_name_true, name=node, value=None)
-    graph.add_node(node_name_false, name=node, value=None)
+    partition[to_fix] = False
 
-    graph.add_edge(parent_node, node_name_false, status=0)
-    graph.add_edge(parent_node, node_name_true, status=1)
+    return partition
 
-    return graph, [node_name_true, node_name_false]
+def get_bound(instances: dict, partition: dict, weights: dict):
+    """Retorna valor de upper bound de relaxação"""
+    bound = 0
 
+    for instance in instances:
+        if weights[instance] > 0:
+            bound += weights[instance]
+            for element in instances[instance]:
+                if not partition[element]:
+                    bound -= weights[instance]
+                    break
+    return bound
 
-def next_node_value(graph: nx.DiGraph, node, weights):
-    """Calcula valor do próximo nó percorrendo como DFS a árvore e retornando o valor
-    """
-    parent = next(graph.predecessors(node))
-    edge = graph.get_edge_data(parent, node)
-    if edge["status"] == 0:
-        graph.node[node]["value"] = graph.node[parent]["value"]
-    else:
-        graph.node[node]["value"] = graph.node[parent]["value"] + weights[str(graph.node[node]["name"])]
+def solve_formula(instances: dict, partition: dict, weights: dict):
+    """Retorna valor da solução final"""
+    result = 0
+    for instance in instances:
+        result += weights[instance]
+        for element in instances[instance]:
+            if not partition[element]:
+                result -= weights[instance]
+                break
+    return result
 
-    return graph
+def build_partition(n):
+    return {str(i):True for i in range(1, n+1)}
 
+def binary_bb(
+    start_nodes_list: list,
+    instances: dict,
+    weights: dict,
+    node_index: int = 0,
+    partition: dict = None,
+    start_index: int = 0,
+    last_bound = 0):
+    
+    if (node_index == len(start_nodes_list)) or (
+        (start_index == len(start_nodes_list)) and (node_index == len(start_nodes_list))
+        ):
+        return solve_formula(instances, partition, weights)
+    
+    if not partition:
+        partition = build_partition(len(start_nodes_list))
 
-def get_start_bound(weights):
-    """Retorna valor de uma solução viável inicial.
-    Ela pode ser a soma de todos os números negativos
-    """
-    lower_sum = 0
-    for weight in weights.values():
-        if weight < 0:
-            lower_sum += weight
-    return lower_sum
+    partition[node_index] = False
+    bound = get_bound(instances, partition, weights)
+    print(start_index, sum(partition.values()), len(partition))
+    if last_bound > bound:
+        return last_bound
 
-
-def select_partition(graph: nx.DiGraph, parent):
-    """Escolher melhor partição a se usar como novo bound
-    """
-    bound = math.inf * -1
-    selected_node = None
-    for node in graph.successors(parent):
-        if graph.node[node]["value"] > bound:
-            bound = graph.node[node]["value"]
-            selected_node = node
-    return bound, selected_node
-
-
-def get_next_node(graph: nx.DiGraph, parent_node, visited, start_nodes_list):
-    for node in graph.successors(parent_node):
-        if node not in visited:
-            visited.append(node)
-            yield node, visited
-    for node in start_nodes_list:
-        if node not in visited:
-            visited.append(node)
-            yield node, visited
-    raise StopIteration()
-
-
-def remove_graph_lower_bound(graph: nx.DiGraph, parent, bound):
-    for node in graph.successors(parent):
-        if graph.node[node]["value"] is not None and graph.node[node]["value"] < bound:
-            graph.remove_node(node)
-    return graph
-
-
-def binary_bb(start_nodes_list: list, graph: nx.DiGraph, weights: dict):
-    bound = get_start_bound(weights)
-    execution_graph = nx.DiGraph()
-    parent_node = uuid.uuid4()
-    start_node = start_nodes_list[0]
-    execution_graph.add_node(parent_node, name=0, value=bound)
-    graph.add_node(parent_node)
-    graph.add_edge(parent_node, start_node)
-    visited = [parent_node]
-    selected_nodes = []
-    for node, visited in get_next_node(graph, parent_node, visited, start_nodes_list):
-        execution_graph, nodes = partition_bb(execution_graph, node, parent_node)
-        execution_graph = next_node_value(execution_graph, nodes[0], weights)
-        execution_graph = next_node_value(execution_graph, nodes[1], weights)
-        bound, parent_node = select_partition(execution_graph, parent_node)
-        selected_nodes.append(parent_node)
-        execution_graph = remove_graph_lower_bound(execution_graph, parent_node, bound)
-    return execution_graph, selected_nodes, bound
+    for node in range(start_index, len(start_nodes_list)):
+        bound = binary_bb(start_nodes_list, instances, weights, node_index+1, partition, start_index, bound)
+    
+    start_index += 1
+    partition = build_partition(len(start_nodes_list))
+    for n in range(start_index):
+        partition[n] = False
+    return binary_bb(start_nodes_list, instances, weights, 0, partition, start_index, bound)

@@ -7,20 +7,18 @@ class Loader:
         self.resource_folder = resource_folder
 
     def parse_from_file(self, filename):
-        with open(os.path.join(self.resource_folder, filename)) as instances:
-            n, m, best = instances.readline().strip().replace("/n", "").split()
-            best_indexes = instances.readline().strip().replace("/n", "").split()[1:]
+        with open(os.path.join(self.resource_folder, filename)) as all_instances:
+            n, m, best = all_instances.readline().strip().replace("/n", "").split()
+            best_indexes = all_instances.readline().strip().replace("/n", "").split()[1:]
 
-            edges = []
+            instances = {}
             weights = dict()
 
-            for raw_line in instances.readlines():
+            for raw_line in all_instances.readlines():
                 line = raw_line.strip().replace("/n", "").split()
                 ident = line[0]
                 c = line[1]
-                ids = line[3:] + [ident]
-                for i in range(0, len(ids) - 1):
-                    edges.append(" ".join([ids[i], ids[i + 1]]))
+                instances[ident] = line[3:]
                 weights[ident] = float(c)
 
-            return ProblemSet(n, m, best, best_indexes, edges, weights)
+            return ProblemSet(n, m, best, best_indexes, instances, weights)
