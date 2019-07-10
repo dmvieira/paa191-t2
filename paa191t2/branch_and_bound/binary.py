@@ -1,18 +1,16 @@
-import uuid
 import math
-import networkx as nx
 
+MEMO_BOUND = dict()
+MEMO_SOLVE = dict()
 
-def partition_bb(to_fix, partition):
-    """Particiona por 0 e 1 e retorna grafo com todos os nós
-    com valores para zero e um (seguindo ou não o ramo da árvore)
-    """
-    partition[to_fix] = False
-
-    return partition
+def serialize_key(key):
+    return str(key.items())
 
 def get_bound(instances: dict, partition: dict, weights: dict):
     """Retorna valor de upper bound de relaxação"""
+    key = serialize_key(partition)
+    if MEMO_BOUND.get(key):
+        return MEMO_BOUND[key]
     bound = 0
 
     for instance in instances:
@@ -22,10 +20,14 @@ def get_bound(instances: dict, partition: dict, weights: dict):
                 if not partition[element]:
                     bound -= weights[instance]
                     break
+    MEMO_BOUND[key] = bound
     return bound
 
 def solve_formula(instances: dict, partition: dict, weights: dict):
     """Retorna valor da solução final"""
+    key = serialize_key(partition)
+    if MEMO_SOLVE.get(key):
+        return MEMO_SOLVE[key]
     result = 0
     for instance in instances:
         result += weights[instance]
@@ -33,39 +35,61 @@ def solve_formula(instances: dict, partition: dict, weights: dict):
             if not partition[element]:
                 result -= weights[instance]
                 break
+    MEMO_SOLVE[key] = result
     return result
 
-def build_partition(n):
-    return {str(i):True for i in range(1, n+1)}
+def build_start_solution(weights: dict):
+    start_solution = 0
+    for weight in weights.values():
+        if weight < 0:
+            start_solution += weight
+    return start_solution
 
-def binary_bb(
-    start_nodes_list: list,
-    instances: dict,
-    weights: dict,
-    node_index: int = 0,
-    partition: dict = None,
-    start_index: int = 0,
-    last_bound = 0):
-    
-    if (node_index == len(start_nodes_list)) or (
-        (start_index == len(start_nodes_list)) and (node_index == len(start_nodes_list))
-        ):
-        return solve_formula(instances, partition, weights)
-    
-    if not partition:
-        partition = build_partition(len(start_nodes_list))
+def build_partition(node_list):
+    return {str(i):True for i in node_list}
 
-    partition[node_index] = False
-    bound = get_bound(instances, partition, weights)
-    print(start_index, sum(partition.values()), len(partition))
-    if last_bound > bound:
-        return last_bound
+def stack(node, default_stack):
+    default_stack.append([node, 0])
+    default_stack.append([node, 1])
+    return default_stack
 
-    for node in range(start_index, len(start_nodes_list)):
-        bound = binary_bb(start_nodes_list, instances, weights, node_index+1, partition, start_index, bound)
-    
-    start_index += 1
-    partition = build_partition(len(start_nodes_list))
-    for n in range(start_index):
-        partition[n] = False
-    return binary_bb(start_nodes_list, instances, weights, 0, partition, start_index, bound)
+def unstack(default_stack: list):
+    node_value = default_stack.pop()
+    return default_stack, node_value
+
+def binary_bb(start_nodes_list: list, instances: dict, weights: dict):
+
+    stack_path = list()
+    stack_path = stack(start_nodes_list[0], stack_path)
+
+    solution = build_start_solution(weights)
+    partition = build_partition(start_nodes_list)
+    visited = []
+
+    while len(stack_path) > 0:
+        stack_path, node_value = unstack(stack_path)
+        node, value = node_value
+        node_value = f"{node}_{value}"
+        partition[str(node)] = value
+        bound = get_bound(instances, partition, weights)
+        if bound > solution:
+            print(partition.values(), bound, solution)
+
+            if node == start_nodes_list[-1]:
+                path_solution = solve_formula(instances, partition, weights)
+
+                if path_solution > solution:
+                    solution = path_solution
+                if path_solution > bound:
+                    bound = path_solution
+                
+            elif node_value not in visited:
+                node_index = start_nodes_list.index(node)
+                stack_path = stack(start_nodes_list[node_index + 1], stack_path)
+
+            if len(visited) > 0 and node > int(visited[-1].split("_")[0]):
+                visited = [node_value]
+            else:
+                visited.append(node_value)
+
+    return solution
