@@ -1,4 +1,4 @@
-from unittest import TestCase, mock
+from unittest import TestCase
 from paa191t2.branch_and_bound.binary import serialize_key, get_bound, solve_formula, binary_bb
 
 
@@ -139,5 +139,6 @@ class TestBinary(TestCase):
             "4": -2.5,
             "5": 1.5
         }
-
-        self.assertEqual(binary_bb(start_node_list, instances, weights), 7.5)
+        result = binary_bb(start_node_list, instances, weights)
+        self.assertEqual(result[0], 7.5)
+        self.assertEqual(result[1], {'1': True, '2': False, '3': True})

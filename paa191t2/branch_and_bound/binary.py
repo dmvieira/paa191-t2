@@ -1,6 +1,9 @@
+import copy
+
 MEMO_BOUND = dict()
 MEMO_SOLVE = dict()
 SOL = 0
+BEST_PARTITION = None
 
 
 def serialize_key(key):
@@ -51,32 +54,35 @@ def build_start_solution(weights: dict):
 
 
 def build_partition(node_list):
-    return {str(i): True for i in node_list}
+    return {str(i): False for i in node_list}
 
 
 def recursive_bb(start_nodes_list, partition, instances, weights, node_index, value):
-    global SOL
-
-    print(SOL)
+    global SOL, BEST_PARTITION
     node = start_nodes_list[node_index]
     partition[str(node)] = value
-    bound = get_bound(instances, partition, weights)
+    bound = get_bound(instances, copy.deepcopy(partition), weights)
+
     if node == start_nodes_list[-1]:
-        partial_solution = solve_formula(instances, partition, weights)
-        SOL = max(SOL, partial_solution)
+        partial_solution = solve_formula(instances, copy.deepcopy(partition), weights)
+        if SOL < partial_solution:
+            BEST_PARTITION = partition
+            SOL = partial_solution
 
     elif bound > SOL:
-        node_index = start_nodes_list.index(node)
-        recursive_bb(start_nodes_list, partition, instances, weights, node_index + 1, True)
-        recursive_bb(start_nodes_list, partition, instances, weights, node_index + 1, False)
+        recursive_bb(start_nodes_list, copy.deepcopy(partition), instances, weights, node_index + 1, False)
+        recursive_bb(start_nodes_list, copy.deepcopy(partition), instances, weights, node_index + 1, True)
+
+    print(BEST_PARTITION, SOL, bound)
     return SOL
 
 
 def binary_bb(start_nodes_list: list, instances: dict, weights: dict):
-    global SOL
-    SOL = build_start_solution(weights)
-    partition = build_partition(start_nodes_list)
-    recursive_bb(start_nodes_list, partition, instances, weights, 0, True)
-    recursive_bb(start_nodes_list, partition, instances, weights, 0, False)
+    global SOL, BEST_PARTITION
 
-    return SOL
+    SOL = build_start_solution(weights)
+    BEST_PARTITION = partition = build_partition(start_nodes_list)
+    recursive_bb(start_nodes_list, copy.deepcopy(partition), instances, weights, 0, False)
+    recursive_bb(start_nodes_list, copy.deepcopy(partition), instances, weights, 0, True)
+
+    return SOL, BEST_PARTITION
