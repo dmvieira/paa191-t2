@@ -1,4 +1,3 @@
-import networkx as nx
 from paa191t2.branch_and_bound.binary import binary_bb
 from paa191t2.branch_and_bound.loader import Loader
 
