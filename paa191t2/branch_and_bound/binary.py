@@ -1,7 +1,6 @@
-import math
-
 MEMO_BOUND = dict()
 MEMO_SOLVE = dict()
+SOL = 0
 
 
 def serialize_key(key):
@@ -10,6 +9,8 @@ def serialize_key(key):
 
 def get_bound(instances: dict, partition: dict, weights: dict):
     """Retorna valor de upper bound de relaxação"""
+    global MEMO_BOUND
+
     key = serialize_key(partition)
     if MEMO_BOUND.get(key):
         return MEMO_BOUND[key]
@@ -28,6 +29,8 @@ def get_bound(instances: dict, partition: dict, weights: dict):
 
 def solve_formula(instances: dict, partition: dict, weights: dict):
     """Retorna valor da solução final"""
+    global MEMO_SOLVE
+
     key = serialize_key(partition)
     if MEMO_SOLVE.get(key):
         return MEMO_SOLVE[key]
@@ -51,49 +54,29 @@ def build_partition(node_list):
     return {str(i): True for i in node_list}
 
 
-def stack(default_stack, node, value):
-    default_stack.append([node, value])
-    return default_stack
+def recursive_bb(start_nodes_list, partition, instances, weights, node_index, value):
+    global SOL
 
+    print(SOL)
+    node = start_nodes_list[node_index]
+    partition[str(node)] = value
+    bound = get_bound(instances, partition, weights)
+    if node == start_nodes_list[-1]:
+        partial_solution = solve_formula(instances, partition, weights)
+        SOL = max(SOL, partial_solution)
 
-def unstack(default_stack: list):
-    node_value = default_stack.pop()
-    return default_stack, node_value
+    elif bound > SOL:
+        node_index = start_nodes_list.index(node)
+        recursive_bb(start_nodes_list, partition, instances, weights, node_index + 1, True)
+        recursive_bb(start_nodes_list, partition, instances, weights, node_index + 1, False)
+    return SOL
 
 
 def binary_bb(start_nodes_list: list, instances: dict, weights: dict):
-
-    stack_path = list()
-    stack_path = stack(stack_path, start_nodes_list[0], 0)
-    stack_path = stack(stack_path, start_nodes_list[0], 1)
-
-    solution = build_start_solution(weights)
+    global SOL
+    SOL = build_start_solution(weights)
     partition = build_partition(start_nodes_list)
-    visited = []
+    recursive_bb(start_nodes_list, partition, instances, weights, 0, True)
+    recursive_bb(start_nodes_list, partition, instances, weights, 0, False)
 
-    c = 0
-    while len(stack_path) > 0:
-        stack_path, node_value = unstack(stack_path)
-        node, value = node_value
-        node_value = f"{node}_{value}"
-        partition[str(node)] = value
-        bound = get_bound(instances, partition, weights)
-        if bound > solution:
-
-            if node == start_nodes_list[-1]:
-                path_solution = solve_formula(instances, partition, weights)
-
-                if path_solution > solution:
-                    solution = path_solution
- 
-            elif node_value not in visited:
-                node_index = start_nodes_list.index(node)
-                stack_path = stack(stack_path, start_nodes_list[node_index + 1], 0)
-                stack_path = stack(stack_path, start_nodes_list[node_index + 1], 1)
-
-            if len(visited) > 0 and node > int(visited[-1].split("_")[0]):
-                visited = [node_value]
-            else:
-                visited.append(node_value)
-
-    return solution
+    return SOL
