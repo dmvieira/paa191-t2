@@ -1,22 +1,13 @@
 import copy
+import math
 
-MEMO_BOUND = dict()
-MEMO_SOLVE = dict()
 SOL = 0
 BEST_PARTITION = None
 
 
-def serialize_key(key):
-    return str(sorted(key.items()))
-
-
 def get_bound(instances: dict, partition: dict, weights: dict):
     """Retorna valor de upper bound de relaxação"""
-    global MEMO_BOUND
 
-    key = serialize_key(partition)
-    if MEMO_BOUND.get(key):
-        return MEMO_BOUND[key]
     bound = 0
 
     for instance in instances:
@@ -26,17 +17,12 @@ def get_bound(instances: dict, partition: dict, weights: dict):
                 if not partition[element]:
                     bound -= weights[instance]
                     break
-    MEMO_BOUND[key] = bound
     return bound
 
 
 def solve_formula(instances: dict, partition: dict, weights: dict):
     """Retorna valor da solução final"""
-    global MEMO_SOLVE
 
-    key = serialize_key(partition)
-    if MEMO_SOLVE.get(key):
-        return MEMO_SOLVE[key]
     result = 0
     for instance in instances:
         result += weights[instance]
@@ -44,12 +30,11 @@ def solve_formula(instances: dict, partition: dict, weights: dict):
             if not partition[element]:
                 result -= weights[instance]
                 break
-    MEMO_SOLVE[key] = result
     return result
 
 
 def build_start_solution(weights: dict):
-    start_solution = 0
+    start_solution = math.inf * -1
     return start_solution
 
 
