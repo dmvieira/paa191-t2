@@ -15,5 +15,10 @@ def branch_and_bound(expression):
         
         if problem.check_bound(sub_problem):      
             problem.branch(sub_problem)
+            print('SUBPROBLEM', sub_problem)
             print('INTERMEDIATE PROBLEM', problem)
+        
+        if not problem.has_subproblem():
+            print('>>>>>>>> NO SOLUTION FOUND')
+
     print('FINAL PROBLEM', problem, 'Iterations', i)

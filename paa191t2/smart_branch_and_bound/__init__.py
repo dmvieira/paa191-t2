@@ -1,6 +1,7 @@
 from functools import reduce
 from queue import PriorityQueue, LifoQueue
 import operator
+import math
 
 
 def product(iterable):
@@ -38,12 +39,16 @@ class Variables:
         self.all = all
         self.size = len(all)
         self.target = target
+        self.initial_solution_value = list(sorted(products, key=lambda p: (p.coeficient, -1 * len(p.variables)), reverse=True))[0].coeficient
 
     def all_zero(self):
         return {k: 0 for k in self.all}
 
     def all_one(self):
         return {k: 1 for k in sorted(self.all, key=lambda v: int(v[1:]))}
+
+    def greater_positive_coeficient(self):
+        return self.initial_solution_value
 
     def __repr__(self):
         return f'Target:{self.target}\nMax: {self.max}\nMin: {self.min}\nNeutral: {self.neutral}\nAll: {self.all}\n\n'
@@ -126,7 +131,7 @@ class Problem:
 
     def __init__(self, expression):
         initial_assignment = expression.variables.all_one()
-        self.solution = 0
+        self.solution = expression.variables.greater_positive_coeficient()
         self.solution_assignment = initial_assignment
         self.upper_bound = expression.bound(initial_assignment)
         self.subproblem_count = 0
@@ -149,7 +154,7 @@ class Problem:
         return False
 
     def check_bound(self, sub_problem):
-        return sub_problem.bound() >= self.upper_bound
+        return sub_problem.bound() >= self.solution
 
     def branch(self, sub_problem):
         self.__expand_sub_problem(sub_problem.level + 1, self.expression.next_variable(), sub_problem.assignment.copy())
@@ -157,14 +162,16 @@ class Problem:
     def __expand_sub_problem(self, level, index, assignment):
         if level > self.expression.variables.size:
             return
-        sub0 = SubProblem(expression=self.expression, level=level, index=index, assignment=assignment.copy(), value=0, leaf=level == self.expression.variables.size)
-        if self.check_bound(sub0):
-            self.subproblem_count += 1
-            self.lifo.put(sub0)
+
         sub1 = SubProblem(expression=self.expression, level=level, index=index, assignment=assignment.copy(), value=1, leaf=level == self.expression.variables.size)
         if self.check_bound(sub1):
             self.subproblem_count += 1
             self.lifo.put(sub1)
+
+        sub0 = SubProblem(expression=self.expression, level=level, index=index, assignment=assignment.copy(), value=0, leaf=level == self.expression.variables.size)
+        if self.check_bound(sub0):
+            self.subproblem_count += 1
+            self.lifo.put(sub0)            
 
     def __repr__(self):
         return f'Solution: {self.solution, "".join(map(lambda v: str(v[1]), self.solution_assignment.items()))}, UpperBound: {self.upper_bound}, SubProblems: {self.subproblem_count}, Lifo: {self.lifo._qsize()}'
@@ -186,4 +193,7 @@ def mock_smart_instance():
     products.append(Product(1, 10, set(['x1'])))
     products.append(Product(2, 20, set(['x1', 'x2'])))
     products.append(Product(3, -40, set(['x2', 'x3'])))
+    products.append(Product(4, 2, set(['x4'])))
+    products.append(Product(5, 0, set(['x5', 'x3'])))
+    products.append(Product(6, 2, set(['x2', 'x3'])))
     return Expression(products, Variables(products))
