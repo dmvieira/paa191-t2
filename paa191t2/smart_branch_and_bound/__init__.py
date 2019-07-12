@@ -131,9 +131,8 @@ class Problem:
 
     def __init__(self, expression):
         initial_assignment = expression.variables.all_one()
-        self.solution = expression.variables.greater_positive_coeficient()
+        self.solution = expression.variables.greater_positive_coeficient() - 1
         self.solution_assignment = initial_assignment
-        self.upper_bound = expression.bound(initial_assignment)
         self.subproblem_count = 0
         self.expression = expression
         self.lifo = LifoQueue()
@@ -174,7 +173,7 @@ class Problem:
             self.lifo.put(sub0)            
 
     def __repr__(self):
-        return f'Solution: {self.solution, "".join(map(lambda v: str(v[1]), self.solution_assignment.items()))}, UpperBound: {self.upper_bound}, SubProblems: {self.subproblem_count}, Lifo: {self.lifo._qsize()}'
+        return f'Solution: {self.solution, "".join(map(lambda v: str(v[1]), self.solution_assignment.items()))}, SubProblems: {self.subproblem_count}, Lifo: {self.lifo._qsize()}'
 
     def __str__(self):
         return self.__repr__()

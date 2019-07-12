@@ -14,12 +14,12 @@ def recursive(problem_set):
 
 
 def smart(problem_set):
-    #expression = build_smart_instance(problem_set)
-    expression = mock_smart_instance()
+    expression = build_smart_instance(problem_set)
+    #expression = mock_smart_instance()
     branch_and_bound(expression)
 
 
 if __name__ == "__main__":
     loader = Loader()
-    problem_set = loader.parse_from_file("nl01-51.txt")
+    problem_set = loader.parse_from_file("nl01-40.txt")
     smart(problem_set)
