@@ -6,3 +6,7 @@ class ProblemSet:
         self.best_vertexes = best_vertexes
         self.instances = instances
         self.weights = weights
+
+    def __str__(self):
+        sep = f"\n\n{'-'*20}Problem Set{'-'*20}\n\n"
+        return f"{sep}[n: {self.n}, m: {self.m}]\n\n[instances: {self.instances}]\n\n[weights: {self.weights}]{sep}"
