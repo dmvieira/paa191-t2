@@ -1,16 +1,8 @@
 from unittest import TestCase
-from paa191t2.branch_and_bound.binary import serialize_key, get_bound, solve_formula, binary_bb
+from paa191t2.branch_and_bound.binary import get_bound, solve_formula, binary_bb
 
 
 class TestBinary(TestCase):
-
-    def test_if_serialize_is_correct(self):
-        t_dict = dict()
-        t_dict["9"] = 3
-        t_dict["1"] = 12
-        t_dict["2"] = 15
-        s_dict = serialize_key(t_dict)
-        self.assertEqual(s_dict, "[('1', 12), ('2', 15), ('9', 3)]")
 
     def test_if_getting_bound(self):
         instances = {

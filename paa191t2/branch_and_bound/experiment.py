@@ -37,14 +37,15 @@ class Experiment(pybnb.Problem):
         self.partition = node.state
 
     def branch(self):
-        if (self._bound > self.solution) and (self.last_node > self.node +1):
-            self.stash.append([self.node+1, False])
-            self.stash.append([self.node+1, True])
+        if (self._bound > self.solution) and (self.last_node > self.node + 1):
+            self.stash.append([self.node + 1, False])
+            self.stash.append([self.node + 1, True])
         self.node, self.value = self.stash.pop()
         self.partition[str(self.node)] = self.value
         node = pybnb.Node()
         node.state = self.partition
         yield node
+
 
 problem = Experiment(problem_set)
 results = pybnb.solve(problem,
