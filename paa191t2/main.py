@@ -24,5 +24,5 @@ def smart(problem_set):
 
 if __name__ == "__main__":
     loader = Loader()
-    problem_set = loader.parse_from_file("nl01-40.txt")
+    problem_set = loader.parse_from_file("nl01-41.txt")
     smart(problem_set)

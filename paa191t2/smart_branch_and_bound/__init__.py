@@ -151,7 +151,7 @@ class Problem:
 
     def ran_enough(self):
         rate = (0.05 * self.enumerations_total_count)
-        return (self.subproblem_count > 10000 and self.subproblem_count < rate) and self.solution != self.initial_best_solution
+        return (self.subproblem_count > 50000 and self.subproblem_count < rate) and self.solution != self.initial_best_solution
 
     def next_subproblem(self):
         return self.lifo.get()
