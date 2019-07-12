@@ -1,6 +1,7 @@
 from functools import reduce
 from queue import PriorityQueue, LifoQueue
 import operator
+import datetime
 import math
 
 
@@ -142,7 +143,11 @@ class Problem:
         self.solution_assignment = initial_assignment
         self.enumerations_total_count = 2**expression.variables.size
         self.subproblem_count = 0
+        self.threashold_solution = 0.1
+        self.time_to_stop = datetime.datetime.now() + datetime.timedelta(hours=1)
+        self.stop_threashold = False
         self.expression = expression
+        self.subproblems_limit = int(self.enumerations_total_count * 0.0001)
         self.lifo = LifoQueue()
         self.__expand_sub_problem(1, self.expression.next_variable(), assignment=initial_assignment.copy())
 
@@ -150,14 +155,17 @@ class Problem:
         return not self.lifo.empty()
 
     def ran_enough(self):
-        rate = (0.05 * self.enumerations_total_count)
-        return (self.subproblem_count > 50000 and self.subproblem_count < rate) and self.solution != self.initial_best_solution
+        if (self.stop_threashold and self.subproblem_count >= self.subproblems_limit) or (datetime.datetime.now() >= self.time_to_stop):
+            return True
+        return False
 
     def next_subproblem(self):
         return self.lifo.get()
 
     def check_solution(self, sub_problem):
         partial = sub_problem.solution()
+        if abs(partial - self.solution) < self.threashold_solution:
+            self.stop_threashold = True
         if partial > self.solution:
             self.solution = partial
             self.solution_assignment = sub_problem.assignment
@@ -186,7 +194,7 @@ class Problem:
 
 
     def __repr__(self):
-        return f'Solution: {self.solution, "".join(map(lambda v: str(v[1]), self.solution_assignment.items()))}, SubProblems: {self.subproblem_count}, Lifo: {self.lifo._qsize()}'
+        return f'Solution: {self.solution, "".join(map(lambda v: str(v[1]), self.solution_assignment.items()))}, SubProblems: {self.subproblem_count} of {self.subproblems_limit}, Lifo: {self.lifo._qsize()}'
 
     def __str__(self):
         return self.__repr__()
