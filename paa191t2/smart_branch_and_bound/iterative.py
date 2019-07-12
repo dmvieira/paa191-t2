@@ -11,6 +11,7 @@ def branch_and_bound(expression):
         if sub_problem.leaf:   
             if problem.check_solution(sub_problem):
                 print('BEST', sub_problem)
+                print('Intermediate problem', problem)
                 
         
         if problem.check_bound(sub_problem):      
