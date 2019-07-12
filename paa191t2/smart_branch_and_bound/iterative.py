@@ -21,3 +21,4 @@ def branch_and_bound(expression):
             print('>>>>>>>> NO SOLUTION FOUND')
 
     print('FINAL PROBLEM', problem, 'Iterations', i)
+    return problem

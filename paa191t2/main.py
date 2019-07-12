@@ -14,9 +14,12 @@ def recursive(problem_set):
 
 
 def smart(problem_set):
+    print(problem_set)
+    print('---'*10)
     expression = build_smart_instance(problem_set)
-    #expression = mock_smart_instance()
-    branch_and_bound(expression)
+    problem = branch_and_bound(expression)
+    print('<<<< Problem solved ', problem_set.best_sum == problem.solution, ' >>>>')
+    print('<<<< Solution Found ', list(filter(lambda v: v[1], problem.solution_assignment.items())),' >>>>>')
 
 
 if __name__ == "__main__":
