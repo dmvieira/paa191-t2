@@ -31,14 +31,20 @@ class Variables:
             for v in product.variables:
                 if not v in priority:
                     priority[v] = 0
-                priority[v] += product.coeficient
-        self.priority = list(sorted(priority.items(), key=lambda t: t[0]))
+                priority[v] += product.coeficient      
+        variables = {}  
+        for p in sorted(products, key=lambda p: p.coeficient):
+            for v in p.variables:
+                if v not in variables or variables[v] > p.coeficient:
+                    variables[v] = p.coeficient
         self.max = max_variables - min_variables
         self.min = min_variables - max_variables
         self.neutral = max_variables & min_variables
         self.all = all
         self.size = len(all)
         self.target = target
+        self.priority = list(sorted(variables.items(), key=lambda p: v[1]))
+        #self.priority = list(sorted(priority.items(), key=lambda t: t[1], reverse=False))
         self.initial_solution_value = list(sorted(products, key=lambda p: (p.coeficient, -1 * len(p.variables)), reverse=True))[0].coeficient
 
     def all_zero(self):
@@ -51,7 +57,7 @@ class Variables:
         return self.initial_solution_value
 
     def __repr__(self):
-        return f'Target:{self.target}\nMax: {self.max}\nMin: {self.min}\nNeutral: {self.neutral}\nAll: {self.all}\n\n'
+        return f'Priority: {self.priority}\nTarget:{self.target}\nMax: {self.max}\nMin: {self.min}\nNeutral: {self.neutral}\nAll: {self.all}\n\n'
 
     def __str__(self):
         return self.__repr__()
@@ -130,9 +136,11 @@ class SubProblem:
 class Problem:
 
     def __init__(self, expression):
-        initial_assignment = expression.variables.all_one()
-        self.solution = expression.variables.greater_positive_coeficient() - 1
+        initial_assignment = expression.variables.all_zero()
+        self.initial_best_solution = expression.variables.greater_positive_coeficient() - 1
+        self.solution = self.initial_best_solution
         self.solution_assignment = initial_assignment
+        self.enumerations_total_count = 2**expression.variables.size
         self.subproblem_count = 0
         self.expression = expression
         self.lifo = LifoQueue()
@@ -140,6 +148,10 @@ class Problem:
 
     def has_subproblem(self):
         return not self.lifo.empty()
+
+    def ran_enough(self):
+        rate = (0.05 * self.enumerations_total_count)
+        return (self.subproblem_count > 5000 and self.subproblem_count < rate) and self.solution != self.initial_best_solution
 
     def next_subproblem(self):
         return self.lifo.get()
@@ -170,7 +182,8 @@ class Problem:
         sub0 = SubProblem(expression=self.expression, level=level, index=index, assignment=assignment.copy(), value=0, leaf=level == self.expression.variables.size)
         if self.check_bound(sub0):
             self.subproblem_count += 1
-            self.lifo.put(sub0)            
+            self.lifo.put(sub0)
+
 
     def __repr__(self):
         return f'Solution: {self.solution, "".join(map(lambda v: str(v[1]), self.solution_assignment.items()))}, SubProblems: {self.subproblem_count}, Lifo: {self.lifo._qsize()}'
