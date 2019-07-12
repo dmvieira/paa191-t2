@@ -30,10 +30,10 @@ class Variables:
             else:
                 min_variables.update(product.variables)
             for v in product.variables:
-                if not v in priority:
+                if v not in priority:
                     priority[v] = 0
-                priority[v] += product.coeficient      
-        variables = {}  
+                priority[v] += product.coeficient
+        variables = {}
         for p in sorted(products, key=lambda p: p.coeficient):
             for v in p.variables:
                 if v not in variables or variables[v] > p.coeficient:
@@ -149,7 +149,7 @@ class Problem:
         self.expression = expression
         self.subproblems_limit = int(self.enumerations_total_count * 0.0001)
         self.lifo = LifoQueue()
-        self.__expand_sub_problem(1, self.expression.next_variable(), assignment=initial_assignment.copy())
+        self.__expand_sub_problem(None, 1, self.expression.next_variable(), assignment=initial_assignment.copy())
 
     def has_subproblem(self):
         return not self.lifo.empty()
@@ -176,9 +176,9 @@ class Problem:
         return sub_problem.bound() >= self.solution
 
     def branch(self, sub_problem):
-        self.__expand_sub_problem(sub_problem.level + 1, self.expression.next_variable(), sub_problem.assignment.copy())
+        self.__expand_sub_problem(sub_problem, sub_problem.level + 1, self.expression.next_variable(), sub_problem.assignment.copy())
 
-    def __expand_sub_problem(self, level, index, assignment):
+    def __expand_sub_problem(self, parent_sub_problem, level, index, assignment):
         if level > self.expression.variables.size:
             return
 
@@ -191,7 +191,6 @@ class Problem:
         if self.check_bound(sub0):
             self.subproblem_count += 1
             self.lifo.put(sub0)
-
 
     def __repr__(self):
         return f'Solution: {self.solution, "".join(map(lambda v: str(v[1]), self.solution_assignment.items()))}, SubProblems: {self.subproblem_count} of {self.subproblems_limit}, Lifo: {self.lifo._qsize()}'

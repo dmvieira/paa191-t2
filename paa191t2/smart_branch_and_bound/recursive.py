@@ -1,8 +1,10 @@
 def branch(expression):
     pass
 
+
 def bound(expression):
-    pass 
-    
+    pass
+
+
 def branch_and_bound(expression):
     pass

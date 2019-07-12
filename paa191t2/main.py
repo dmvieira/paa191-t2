@@ -14,15 +14,17 @@ def recursive(problem_set):
 
 
 def smart(problem_set):
-    print(problem_set)
-    print('---'*10)
     expression = build_smart_instance(problem_set)
-    problem = branch_and_bound(expression)
-    print('<<<< Problem solved ', problem_set.best_sum == problem.solution, ' >>>>')
-    print('<<<< Solution Found ', list(filter(lambda v: v[1], problem.solution_assignment.items())),' >>>>>')
+    problem = branch_and_bound(expression, problem_set.best_sum)
+    print('<<<< Problem solved ', problem_set.best_sum == problem.solution,  ' >>>>')
+
+
+def instrumented_smart(instance=None):
+    expression = build_smart_instance(instance)
+    branch_and_bound(expression)
 
 
 if __name__ == "__main__":
     loader = Loader()
-    problem_set = loader.parse_from_file("nl01-41.txt")
+    problem_set = loader.parse_from_file("nl01-43.txt")
     smart(problem_set)
