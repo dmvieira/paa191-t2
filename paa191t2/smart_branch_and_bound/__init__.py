@@ -167,7 +167,7 @@ class Problem:
             self.lifo.put(sub1)
 
     def __repr__(self):
-        return f'Solution: {self.solution, self.solution_assignment}, UpperBound: {self.upper_bound}, SubProblems: {self.subproblem_count}, Lifo: {self.lifo._qsize()}'
+        return f'Solution: {self.solution, "".join(map(lambda v: str(v[1]), self.solution_assignment.items()))}, UpperBound: {self.upper_bound}, SubProblems: {self.subproblem_count}, Lifo: {self.lifo._qsize()}'
 
     def __str__(self):
         return self.__repr__()
