@@ -144,7 +144,7 @@ class Problem:
         self.enumerations_total_count = 2**expression.variables.size
         self.subproblem_count = 0
         self.threashold_solution = 0.1
-        self.time_to_stop = datetime.datetime.now() + datetime.timedelta(hours=1)
+        self.time_to_stop = datetime.datetime.now() + datetime.timedelta(minutes=3)
         self.stop_threashold = False
         self.expression = expression
         self.subproblems_limit = int(self.enumerations_total_count * 0.0001)

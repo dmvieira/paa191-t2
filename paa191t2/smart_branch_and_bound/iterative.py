@@ -1,10 +1,10 @@
 from queue import LifoQueue
-from . import Problem
+from . import Problem, Expression, Variables, Product
 
 
-def branch_and_bound(expression, solution=None):
+def branch_and_bound(expression=None, solution=None):
     problem = Problem(expression)
-    print('INITIAL PROBLEM', problem)
+    # print('INITIAL PROBLEM', problem)
     i = 0
     # problem.has_subproblem() : Enquanto existem subproblemas viaveis na pilha de execucao
     # problem.ran_enough() : Termina a execucao do algoritmo em casos extremos (desrespeite o threshold)
@@ -16,16 +16,16 @@ def branch_and_bound(expression, solution=None):
 
         # Caso um caminho completo entre v e u, sendo v raiz da arvore e u a ultima folha avaliada
         if sub_problem.leaf:
-            # Verifica se o somotario dos produtos para o conjunto de variaveis satisfaz o criterio de melhor            
+            # Verifica se o somotario dos produtos para o conjunto de variaveis satisfaz o criterio de melhor
             if problem.check_solution(sub_problem):
                 # Neste caso, melhor significa qualquer valor para f(x) maior que o ultimo valor valido registrado anteriormente
-                print('BEST', sub_problem)
-                
+                # print('BEST', sub_problem)
+
                 # Esta linha e apenas para demonstracoes
                 if solution is not None and problem.solution == solution:
                     break
 
-                print('Intermediate problem', problem)
+                # print('Intermediate problem', problem)
 
         # Caso o upper bound seja melhor que a ultima solucao registrada o ramo continuara a ser explorado
         # Internamente este metodo evita que novos subproblemas sejam criados caso o nivel da arvore seja o mais profundo, ou seja uma folha
@@ -37,7 +37,19 @@ def branch_and_bound(expression, solution=None):
 
         # Caso todos os subproblemas viaveis tenham sido avaliados, significa que nao fomos capazes de encontrar uma solucao para o problema
         if not problem.has_subproblem():
-            print('>>>>>>>> NO SOLUTION FOUND')
+            pass
+            # print('>>>>>>>> NO SOLUTION FOUND')
 
     print('FINAL PROBLEM', problem, 'Iterations', i)
-    return problem
+    print('<<<< Problem solved ', solution == problem.solution, ' >>>>')
+
+
+def build_smart_instance(problem_set):
+    products = set()
+    for product_index, product_variables in problem_set.instances.items():
+        product = Product(product_index, problem_set.weights[product_index], set(map(lambda v: f'x{v}', product_variables)))
+        products.add(product)
+    return Expression(products, Variables(products))
+
+def smart_bb(instance=None):
+    branch_and_bound(build_smart_instance(instance), instance.best_sum)    

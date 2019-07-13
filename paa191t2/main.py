@@ -15,16 +15,10 @@ def recursive(problem_set):
 
 def smart(problem_set):
     expression = build_smart_instance(problem_set)
-    problem = branch_and_bound(expression, problem_set.best_sum)
-    print('<<<< Problem solved ', problem_set.best_sum == problem.solution,  ' >>>>')
-
-
-def instrumented_smart(instance=None):
-    expression = build_smart_instance(instance)
-    branch_and_bound(expression)
+    branch_and_bound(expression, problem_set.best_sum)
 
 
 if __name__ == "__main__":
-    loader = Loader()
-    problem_set = loader.parse_from_file("nl01-43.txt")
+    loader = Loader(resource_folder="paa191t2/instances/")
+    problem_set = loader.parse_from_file("nl01-005.txt")
     smart(problem_set)
