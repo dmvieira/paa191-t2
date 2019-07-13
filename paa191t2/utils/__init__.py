@@ -21,9 +21,10 @@ def load_instance(instance_name, instance_file, i=0):
 
 def generate_instances(instance_dir):
     i = 0
-    for _file in sorted(filter(lambda p: 'nl01' in p, os.listdir(instance_dir))):
+    instances = list(map(lambda v: (int(v.replace('.txt', '').replace('-', '').replace('bqp', '')), v.replace('.txt', '')), filter(lambda v: 'bqp' in v, os.listdir(instance_dir))))
+    for _, _file in sorted(instances):
         i += 1
-        yield load_instance(_file.replace('.txt', ''),f'{instance_dir}/{_file}', i)
+        yield load_instance(_file,f'{instance_dir}/{_file}.txt', i)
 
 
 def c2_exp_n(n=1, m=1, c=1):

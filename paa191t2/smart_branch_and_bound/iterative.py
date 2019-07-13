@@ -19,7 +19,7 @@ def branch_and_bound(expression=None, solution=None):
             # Verifica se o somotario dos produtos para o conjunto de variaveis satisfaz o criterio de melhor
             if problem.check_solution(sub_problem):
                 # Neste caso, melhor significa qualquer valor para f(x) maior que o ultimo valor valido registrado anteriormente
-                # print('BEST', sub_problem)
+                #print('BEST', sub_problem)
 
                 # Esta linha e apenas para demonstracoes
                 if solution is not None and problem.solution == solution:
@@ -40,8 +40,8 @@ def branch_and_bound(expression=None, solution=None):
             pass
             # print('>>>>>>>> NO SOLUTION FOUND')
 
-    print('FINAL PROBLEM', problem, 'Iterations', i)
-    print('<<<< Problem solved ', solution == problem.solution, ' >>>>')
+    #print('FINAL PROBLEM', problem, 'Iterations', i)
+    #print('<<<< Problem solved ', solution == problem.solution, ' >>>>')
 
 
 def build_smart_instance(problem_set):

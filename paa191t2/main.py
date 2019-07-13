@@ -20,6 +20,6 @@ def smart(problem_set):
 
 if __name__ == "__main__":
     loader = Loader(resource_folder="paa191t2/resources2/")
-    problem_set = loader.parse_from_file("bqp50-1.txt")
-    print(problem_set.weights)
+    problem_set = loader.parse_from_file("bqp100-2.txt")
+    #print(problem_set.weights)
     smart(problem_set)

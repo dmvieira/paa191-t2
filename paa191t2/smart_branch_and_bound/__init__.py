@@ -45,7 +45,6 @@ class Variables:
         self.size = len(all)
         self.target = target
         self.priority = list(sorted(variables.items(), key=lambda p: v[1]))
-        #self.priority = list(sorted(priority.items(), key=lambda t: t[1], reverse=False))
         self.initial_solution_value = list(sorted(products, key=lambda p: (p.coeficient, -1 * len(p.variables)), reverse=True))[0].coeficient
 
     def all_zero(self):
@@ -138,7 +137,7 @@ class Problem:
 
     def __init__(self, expression):
         initial_assignment = expression.variables.all_zero()
-        self.initial_best_solution = expression.variables.greater_positive_coeficient() - 1
+        self.initial_best_solution = 0
         self.solution = self.initial_best_solution
         self.solution_assignment = initial_assignment
         self.enumerations_total_count = 2**expression.variables.size
