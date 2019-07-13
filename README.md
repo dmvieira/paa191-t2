@@ -24,4 +24,10 @@ make setup
 make tests
 ```
 
+- Rodar um exemplo
+
+```
+make run
+```
+
 ---
